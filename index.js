@@ -26,7 +26,7 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(chatId, 'Жми скорее! CLO ждет!!!', opts);
 });
 
-console.log('Бот запущен...');
+console.log('Бот запущен..');
 
 bot.onText(/\/echo (.+)/, (msg, match) => {
 
