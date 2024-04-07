@@ -14,12 +14,21 @@ const app = express();
 const port = process.env.PORT || 3000; // Set the port to 3000 as required
 
 // Настройка пула соединений с PostgreSQL
+//const pool = new Pool({
+  //user: process.env.DB_USER,
+ // host: process.env.DB_HOST,
+ // database: process.env.DB_NAME,
+  //password: process.env.DB_PASSWORD,
+  //port: process.env.DB_PORT,
+//});
+
+// Создаем новый пул соединений
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  user: 'koyeb-adm',
+  host: 'ep-spring-breeze-a2fb6o41.eu-central-1.pg.koyeb.app',
+  database: 'koyebdb',
+  password: '9b6vxTfkZuPg',
+  port: 5432,
 });
 
 app.use(cors()); // Use CORS middleware
