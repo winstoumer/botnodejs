@@ -11,7 +11,7 @@ const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000; // Set the port to 3000 as required
 
 // Настройка пула соединений с PostgreSQL
 const pool = new Pool({
@@ -22,21 +22,10 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-// ... Оставшийся код API ...
-
-// Обработка несуществующих маршрутов
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not Found' });
-});
-
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
-});
-
+app.use(cors()); // Use CORS middleware
 app.use(express.json()); // Для парсинга JSON тела запросов
 
-app.use(cors());
-
+// Define API routes
 app.get('/api/coins/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -67,6 +56,12 @@ app.post('/api/coins/:userId', async (req, res) => {
   }
 });
 
+// Обработка несуществующих маршрутов
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found' });
+});
+
+// Start the server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
