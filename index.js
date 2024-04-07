@@ -26,10 +26,10 @@ app.use(cors()); // Use CORS middleware
 app.use(express.json()); // Для парсинга JSON тела запросов
 
 // Define API routes
-app.get('/api/coins/:userId', async (req, res) => {
+app.get('/api/coins/935718482', async (req, res) => {
   try {
-    const { userId } = req.params;
-    const { rows } = await pool.query('SELECT coins FROM balance WHERE telegram_user_id = $1', [userId]);
+    // const { ʼ } = req.params;
+    const { rows } = await pool.query('SELECT coins FROM balance WHERE telegram_user_id = $1', ['935718482']);
     if (rows.length > 0) {
       res.json(rows[0]);
     } else {
@@ -41,11 +41,11 @@ app.get('/api/coins/:userId', async (req, res) => {
 });
 
 // Сохранение количества монет
-app.post('/api/coins/:userId', async (req, res) => {
+app.post('/api/coins/935718482', async (req, res) => {
   try {
-    const { userId } = req.params;
+    // const { userId } = req.params;
     const { coins } = req.body;
-    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, userId]);
+    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, ʼ935718482ʼ]);
     if (result.rowCount > 0) {
       res.status(200).send('Coins updated');
     } else {
