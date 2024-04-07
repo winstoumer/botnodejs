@@ -34,6 +34,24 @@ const pool = new Pool({
 app.use(cors()); // Use CORS middleware
 app.use(express.json()); // Для парсинга JSON тела запросов
 
+// Функция для получения количества монет пользователя
+async function getCoins(telegramUserId) {
+  try {
+    const query = 'SELECT coins FROM balance WHERE telegram_user_id = $1';
+    const values = [telegramUserId];
+
+    // Здесь мы выполняем запрос, используя плейсхолдер $1 для параметра
+    const res = await pool.query(query, values);
+    return res.rows;
+  } catch (err) {
+    console.error('Error executing query', err.stack);
+    throw err;
+  }
+}
+
+// Пример использования функции
+const telegramUserId = '935718482';
+
 // Define API routes
 app.get('/api/coins/935718482', async (req, res) => {
   try {
