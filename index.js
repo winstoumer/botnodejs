@@ -11,7 +11,7 @@ const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = 8000;
 
 // Настройка пула соединений с PostgreSQL
 const pool = new Pool({
