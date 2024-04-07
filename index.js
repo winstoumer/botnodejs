@@ -13,7 +13,7 @@ const bot = new TelegramBot(token, { polling: true })
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  const webAppUrl = 'https://t.me/@minerweb3_bot/app';
+  const webAppUrl = 'https://t.me/minerweb3_bot/app';
 
   const opts = {
     reply_markup: JSON.stringify({
