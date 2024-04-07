@@ -53,14 +53,11 @@ async function getCoins(telegramUserId) {
   }
 }
 
-// Пример использования функции
-const telegramUserId = '935718482';
-
 // Define API routes
-app.get('/api/coins/935718482', async (req, res) => {
+app.get('/api/coins/:userId', async (req, res) => {
   try {
-    // const { ʼ } = req.params;
-    const { rows } = await pool.query('SELECT coins FROM balance WHERE telegram_user_id = $1', ['935718482']);
+    const { userId } = req.params;
+    const { rows } = await pool.query('SELECT coins FROM balance WHERE telegram_user_id = $1', [userId]);
     if (rows.length > 0) {
       res.json(rows[0]);
     } else {
@@ -72,11 +69,11 @@ app.get('/api/coins/935718482', async (req, res) => {
 });
 
 // Сохранение количества монет
-app.post('/api/coins/935718482', async (req, res) => {
+app.post('/api/coins/:userId', async (req, res) => {
   try {
-    // const { userId } = req.params;
+    const { userId } = req.params;
     const { coins } = req.body;
-    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, ʼ935718482ʼ]);
+    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, [userId]);
     if (result.rowCount > 0) {
       res.status(200).send('Coins updated');
     } else {
