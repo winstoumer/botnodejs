@@ -89,6 +89,15 @@ bot.onText(/\/start/, (msg) => {
 
 console.log('Бот запущен..');
 
+// Обработчик для команды '/getuserid'.
+bot.onText(/\/getuserid/, (msg) => {
+  const chatId = msg.chat.id;
+  const userId = msg.from.id;
+
+  // Отправляем ID пользователя обратно в чат.
+  bot.sendMessage(chatId, `Ваш Telegram ID: ${userId}`);
+});
+
 bot.onText(/\/echo (.+)/, (msg, match) => {
 
 	const chatId = msg.chat.id
