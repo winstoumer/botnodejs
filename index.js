@@ -29,6 +29,10 @@ const pool = new Pool({
   database: 'koyebdb',
   password: '9b6vxTfkZuPg',
   port: 5432,
+  ssl: {
+    require: true,
+    rejectUnauthorized: false // Это не рекомендуется для продакшена, так как это может создать уязвимость безопасности
+  }
 });
 
 app.use(cors()); // Use CORS middleware
