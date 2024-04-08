@@ -45,28 +45,6 @@ app.get('/api/coins/:userId', async (req, res) => {
 });
 
 // Сохранение собранных монет в таблицу Collect
-app.post('/api/collect/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { collecting, collectDate } = req.body;
-
-    // Проверяем наличие userId и собранных монет
-    if (!userId || !collecting || !collectDate) {
-      return res.status(400).json({ error: 'Missing required parameters in the request' });
-    }
-
-    // Вставляем новую запись в таблицу Collect
-    const result = await pool.query('INSERT INTO collect (collecting, telegram_user_id, date) VALUES ($1, $2, $3)', [collecting, userId, collectDate]);
-    if (result.rowCount > 0) {
-      return res.status(200).send('Collecting record added');
-    } else {
-      return res.status(500).send('Failed to add collecting record');
-    }
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-});
-
 // Сохранение количества монет в таблицу Balance
 app.post('/api/coins/:userId', async (req, res) => {
   try {
@@ -84,6 +62,29 @@ app.post('/api/coins/:userId', async (req, res) => {
       return res.status(200).send('Coins updated');
     } else {
       return res.status(404).send('User not found');
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Сохранение количества собранных монет в таблицу Collect
+app.post('/api/collect/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { collecting } = req.body;
+
+    // Проверяем наличие userId и собранных монет
+    if (!userId || !collecting) {
+      return res.status(400).json({ error: 'Missing required parameters in the request' });
+    }
+
+    // Вставляем новую запись в таблицу Collect
+    const result = await pool.query('INSERT INTO collect (collecting, telegram_user_id) VALUES ($1, $2)', [collecting, userId]);
+    if (result.rowCount > 0) {
+      return res.status(200).send('Collecting record added');
+    } else {
+      return res.status(500).send('Failed to add collecting record');
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });
