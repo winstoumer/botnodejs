@@ -11,16 +11,7 @@ const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 3000; // Set the port to 3000 as required
-
-// Настройка пула соединений с PostgreSQL
-//const pool = new Pool({
-  //user: process.env.DB_USER,
- // host: process.env.DB_HOST,
- // database: process.env.DB_NAME,
-  //password: process.env.DB_PASSWORD,
-  //port: process.env.DB_PORT,
-//});
+const port = process.env.PORT || 3000; // Set the port to 3000 as 
 
 // Создаем новый пул соединений
 const pool = new Pool({
@@ -36,22 +27,7 @@ const pool = new Pool({
 });
 
 app.use(cors()); // Use CORS middleware
-app.use(express.json()); // Для парсинга JSON тела запросов
-
-// Функция для получения количества монет пользователя
-async function getCoins(telegramUserId) {
-  try {
-    const query = 'SELECT coins FROM balance WHERE telegram_user_id = $1';
-    const values = [telegramUserId];
-
-    // Здесь мы выполняем запрос, используя плейсхолдер $1 для параметра
-    const res = await pool.query(query, values);
-    return res.rows;
-  } catch (err) {
-    console.error('Error executing query', err.stack);
-    throw err;
-  }
-}
+app.use(express.json()); // Для парсинга JSON тела 
 
 // Define API routes
 app.get('/api/coins/:userId', async (req, res) => {
@@ -73,7 +49,7 @@ app.post('/api/coins/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const { coins } = req.body;
-    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, [userId]);
+    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, userId]);
     if (result.rowCount > 0) {
       res.status(200).send('Coins updated');
     } else {
