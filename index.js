@@ -112,6 +112,24 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const webAppUrl = 'https://t.me/minerweb3_bot/app';
 
+    bot.sendMessage(chatId, '<b>Привет!</b>', {
+    parse_mode: 'HTML',
+    // Указываем параметры, управляющие внешним видом окна
+    reply_markup: {
+      inline_keyboard: [],
+      // Указываем цвет фона и название окна
+      resize_keyboard: true,
+      keyboard: [],
+      force_reply: true,
+      selective: true,
+      input_field_placeholder: 'Введите что-нибудь',
+      // Здесь указываем желаемый цвет фона и название окна
+      background_color: '#FFFFFF',
+      title: 'Название вашего приложения'
+    }
+  });
+
+
   const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
