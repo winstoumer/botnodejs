@@ -49,14 +49,20 @@ app.post('/api/coins/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const { coins } = req.body;
+
+    // Проверяем наличие userId
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId in request parameters' });
+    }
+
     const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, userId]);
     if (result.rowCount > 0) {
-      res.status(200).send('Coins updated');
+      return res.status(200).send('Coins updated');
     } else {
-      res.status(404).send('User not found');
+      return res.status(404).send('User not found');
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
