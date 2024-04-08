@@ -54,29 +54,33 @@ app.post('/api/coins/:userId', async (req, res) => {
       return res.status(400).json({ error: 'Missing userId in request parameters' });
     }
 
-    // Обновляем количество монет в таблице Balance
-    const resultBalance = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, userId]);
+    // Получаем текущий баланс пользователя
+    const { rows } = await pool.query('SELECT coins FROM balance WHERE telegram_user_id = $1', [userId]);
+    const currentCoins = rows.length > 0 ? rows[0].coins : 0;
 
-    // Проверяем успешность обновления записи в таблице Balance
-    if (resultBalance.rowCount === 0) {
-      return res.status(404).send('User not found');
-    }
+    // Обновляем баланс пользователя в таблице balance
+    const updatedCoins = currentCoins + coins;
+    const updateResult = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [updatedCoins, userId]);
 
-      const collectDate = new Date().toISOString(); // Получаем текущую дату и время в формате ISO
+    // Проверяем, было ли успешно обновлено
+    if (updateResult.rowCount > 0) {
+      // Сохраняем количество собранных монет в таблице collect
+      const collectDate = new Date().toISOString();
+      const collectResult = await pool.query('INSERT INTO collect (collecting, date, telegram_user_id) VALUES ($1, $2, $3)', [coins, collectDate, userId]);
 
-const resultCollect = await pool.query('INSERT INTO Collect (collecting, date, telegram_user_id) VALUES ($1, $2, $3)', [coins, collectDate, userId]);
-
-    
-    // Проверяем успешность вставки записи в таблицу Collect
-    if (resultCollect.rowCount > 0) {
-      return res.status(200).send('Coins updated and saved to Collect');
+      if (collectResult.rowCount > 0) {
+        return res.status(200).send('Coins updated and collected');
+      } else {
+        return res.status(500).json({ error: 'Failed to save collected coins' });
+      }
     } else {
-      return res.status(500).send('Failed to save coins to Collect');
+      return res.status(404).send('User not found');
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 });
+
 
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
