@@ -44,7 +44,6 @@ app.get('/api/coins/:userId', async (req, res) => {
   }
 });
 
-// Сохранение количества монет
 app.post('/api/coins/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -55,11 +54,24 @@ app.post('/api/coins/:userId', async (req, res) => {
       return res.status(400).json({ error: 'Missing userId in request parameters' });
     }
 
-    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, userId]);
-    if (result.rowCount > 0) {
-      return res.status(200).send('Coins updated');
-    } else {
+    // Обновляем количество монет в таблице Balance
+    const resultBalance = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, userId]);
+
+    // Проверяем успешность обновления записи в таблице Balance
+    if (resultBalance.rowCount === 0) {
       return res.status(404).send('User not found');
+    }
+
+      const collectDate = new Date().toISOString(); // Получаем текущую дату и время в формате ISO
+
+const resultCollect = await pool.query('INSERT INTO Collect (collecting, date, telegram_user_id) VALUES ($1, $2, $3)', [coins, collectDate, userId]);
+
+    
+    // Проверяем успешность вставки записи в таблицу Collect
+    if (resultCollect.rowCount > 0) {
+      return res.status(200).send('Coins updated and saved to Collect');
+    } else {
+      return res.status(500).send('Failed to save coins to Collect');
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });
