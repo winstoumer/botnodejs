@@ -108,26 +108,14 @@ const token = '6306257543:AAG4VxHk9JiuxTb3-LweaDJfvpcdZRNgD5A'
 
 const bot = new TelegramBot(token, { polling: true })
 
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
+console.log('Бот запущен..');
+
+bot.onText(/\/start r_(\d+)/, (msg, match) => {
+  const userId = msg.from.id;
+  const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
   const webAppUrl = 'https://t.me/minerweb3_bot/app';
 
-    bot.sendMessage(chatId, '<b>Привет!</b>', {
-    parse_mode: 'HTML',
-    // Указываем параметры, управляющие внешним видом окна
-    reply_markup: {
-      inline_keyboard: [],
-      // Указываем цвет фона и название окна
-      resize_keyboard: true,
-      keyboard: [],
-      force_reply: true,
-      selective: true,
-      input_field_placeholder: 'Введите что-нибудь',
-      // Здесь указываем желаемый цвет фона и название окна
-      background_color: '#FFFFFF',
-      title: 'Название вашего приложения'
-    }
-  });
+    bot.sendMessage(chatId, '<b>Привет!</b>');
 
 
   const opts = {
@@ -138,14 +126,7 @@ bot.onText(/\/start/, (msg) => {
     })
   };
 
-  bot.sendMessage(chatId, 'Пора добывать!', opts);
-});
-
-console.log('Бот запущен..');
-
-bot.onText(/\/start r_(\d+)/, (msg, match) => {
-  const userId = msg.from.id;
-  const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
+  bot.sendMessage(chatId, 'Пора добывать!', opts); 
   // Здесь вы можете добавить логику для обработки реферальной ссылки
   // Например, сохранить информацию о реферере и реферале в базе данных
   // и начислить вознаграждение пользователю, который отправил ссылку
