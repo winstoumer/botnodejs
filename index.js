@@ -114,11 +114,11 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
 
   bot.sendMessage(chatId, 'Пора добывать!', opts);
 
-  try {
-
   const userId = msg.from.id;
   const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
   const webAppUrl = 'https://t.me/minerweb3_bot/app';
+
+  try {
     
     // Проверяем, существует ли пользователь в базе данных
     const userQuery = 'SELECT * FROM Balance WHERE telegram_user_id = $1';
@@ -137,19 +137,20 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
     await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, userId]);
 
     bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 100 монет за приглашение.`);
+    
+  } catch (error) {
+    console.error('Ошибка:', error);
+    bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
+  }
 
-
-  const opts = {
+const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
         [{ text: 'Open', web_app: { url: webAppUrl } }]
       ]
     })
-  };    
-  } catch (error) {
-    console.error('Ошибка:', error);
-    bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
-  }
+  };
+
 });
 
 // Обработчик для команды '/getuserid'.
