@@ -130,27 +130,32 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
     // Проверяем, существует ли пользователь в базе данных
     const userQuery = 'SELECT * FROM Balance WHERE telegram_user_id = $1';
     const userResult = await pool.query(userQuery, [userId]);
+
+    // Проверяем, существует ли уже запись о реферале в таблице referral
+    const referralQuery = 'SELECT * FROM referral WHERE telegram_user_id = $1 AND referral_id = $2';
+    const referralResult = await pool.query(referralQuery, [userId, referrerId]);
     
-    if (userResult.rows.length === 0) {
+    if (userResult.rows.length === 0 && referralResult.rows.length === 0) {
       // Добавляем нового пользователя в базу данных
       await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
+
+      // Добавляем информацию о реферале в таблицу referral
+      await pool.query('INSERT INTO referral (telegram_user_id, referral_id) VALUES ($1, $2)', [userId, referrerId]);
+
+      // Добавляем реферальные бонусы
+      await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, referrerId]);
+      await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, userId]);
+
+      bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 100 монет за приглашение.`, opts);
+    } else {
+      bot.sendMessage(userId, 'Вы уже были приглашены или ранее присоединились.');
     }
-
-    // Добавляем информацию о реферале в таблицу referral
-    await pool.query('INSERT INTO referral (telegram_user_id, referral_id) VALUES ($1, $2)', [userId, referrerId]);
-
-    // Добавляем реферальные бонусы
-    await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, referrerId]);
-    await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, userId]);
-
-    bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 100 монет за приглашение.`, opts);
     
   } catch (error) {
     console.error('Ошибка:', error);
     bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
   }
 });
-
 
 // Обработчик для команды '/getuserid'.
 bot.onText(/\/getuserid/, (msg) => {
