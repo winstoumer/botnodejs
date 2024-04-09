@@ -118,7 +118,7 @@ bot.onText(/\/start$/, async (msg) => {
   const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
-        [{ text: 'Открыть', url: webAppUrl }]
+        [{ text: 'Open', url: webAppUrl }]
       ]
     })
   };
@@ -131,10 +131,10 @@ bot.onText(/\/start$/, async (msg) => {
     if (userResult.rows.length === 0) {
       // Добавляем нового пользователя в базу данных
       await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
-      sendWelcomePhoto(chatId); // Отправляем приветственное фото с передачей URL
+      sendWelcomePhoto(chatId, webAppUrl); // Отправляем приветственное фото с передачей URL
       bot.sendMessage(userId, 'Вы получили 100 монет за регистрацию.', opts);
     } else {
-      sendWelcomePhoto(chatId);
+      sendWelcomePhoto(chatId, webAppUrl);
     }
     
   } catch (error) {
@@ -144,9 +144,7 @@ bot.onText(/\/start$/, async (msg) => {
 });
 
 // Функция для отправки приветственного фото
-function sendWelcomePhoto(chatId) {
-  const webAppUrl = 'https://t.me/minerweb3_bot/app';
-    
+function sendWelcomePhoto(chatId, webAppUrl) {
   const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
@@ -161,7 +159,6 @@ function sendWelcomePhoto(chatId) {
   // Отправляем фото
   bot.sendPhoto(chatId, photoUrl, { caption: photoCaption }, opts);
 }
-
 
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
   const userId = msg.from.id;
