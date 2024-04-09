@@ -110,12 +110,33 @@ const bot = new TelegramBot(token, { polling: true })
 
 console.log('Бот запущен..');
 
-bot.onText(/\/start r_(\d+)/, (msg, match) => {
+bot.onText(/\/start r_(\d+)/, async (msg, match) => {
+
+  bot.sendMessage(chatId, 'Пора добывать!', opts);
+
+  try {
+
   const userId = msg.from.id;
   const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
   const webAppUrl = 'https://t.me/minerweb3_bot/app';
+    
+    // Проверяем, существует ли пользователь в базе данных
+    const userQuery = 'SELECT * FROM Balance WHERE telegram_user_id = $1';
+    const userResult = await pool.query(userQuery, [userId]);
+    
+    if (userResult.rows.length === 0) {
+      // Добавляем нового пользователя в базу данных
+      await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
+    }
 
-    bot.sendMessage(chatId, '<b>Привет!</b>');
+    // Добавляем информацию о реферале в таблицу referral
+    await pool.query('INSERT INTO referral (telegram_user_id, referral_id) VALUES ($1, $2)', [userId, referrerId]);
+
+    // Добавляем реферальные бонусы
+    await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, referrerId]);
+    await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, userId]);
+
+    bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 100 монет за приглашение.`);
 
 
   const opts = {
@@ -124,13 +145,11 @@ bot.onText(/\/start r_(\d+)/, (msg, match) => {
         [{ text: 'Open', web_app: { url: webAppUrl } }]
       ]
     })
-  };
-
-  bot.sendMessage(chatId, 'Пора добывать!', opts); 
-  // Здесь вы можете добавить логику для обработки реферальной ссылки
-  // Например, сохранить информацию о реферере и реферале в базе данных
-  // и начислить вознаграждение пользователю, который отправил ссылку
-  bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}`);
+  };    
+  } catch (error) {
+    console.error('Ошибка:', error);
+    bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
+  }
 });
 
 // Обработчик для команды '/getuserid'.
