@@ -118,7 +118,7 @@ bot.onText(/\/start$/, async (msg) => {
   const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
-        [{ text: 'Open', url: webAppUrl }]
+        [{ text: 'Открыть', url: webAppUrl }]
       ]
     })
   };
@@ -131,8 +131,8 @@ bot.onText(/\/start$/, async (msg) => {
     if (userResult.rows.length === 0) {
       // Добавляем нового пользователя в базу данных
       await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
+      bot.sendMessage(userId, 'Вы получили 100 монет за регистрацию.');
       sendWelcomePhoto(chatId, webAppUrl); // Отправляем приветственное фото с передачей URL
-      bot.sendMessage(userId, 'Вы получили 100 монет за регистрацию.', opts);
     } else {
       sendWelcomePhoto(chatId, webAppUrl);
     }
@@ -145,20 +145,13 @@ bot.onText(/\/start$/, async (msg) => {
 
 // Функция для отправки приветственного фото
 function sendWelcomePhoto(chatId, webAppUrl) {
-  const opts = {
-    reply_markup: JSON.stringify({
-      inline_keyboard: [
-        [{ text: 'Открыть', url: webAppUrl }]
-      ]
-    })
-  };
-
   const photoUrl = 'https://i.ibb.co/rfz1Q9b/Designer-34.jpg'; // URL вашего фото
   const photoCaption = 'Заводи машину!'; // Подпись к фото
 
-  // Отправляем фото
-  bot.sendPhoto(chatId, photoUrl, { caption: photoCaption }, opts);
+  // Отправляем фото вместе с кнопкой "Открыть"
+  bot.sendPhoto(chatId, photoUrl, { caption: photoCaption, reply_markup: { inline_keyboard: [[{ text: 'Открыть', url: webAppUrl }]] } });
 }
+
 
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
   const userId = msg.from.id;
