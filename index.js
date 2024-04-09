@@ -152,7 +152,7 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
     }
     
   } catch (error) {
-    console.error('Ошибка:', error);
+    console.error('Error:', error);
     bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
   }
 });
