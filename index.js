@@ -143,6 +143,15 @@ bot.onText(/\/start/, (msg) => {
 
 console.log('Бот запущен..');
 
+bot.onText(/\/start r_(\d+)/, (msg, match) => {
+  const userId = msg.from.id;
+  const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
+  // Здесь вы можете добавить логику для обработки реферальной ссылки
+  // Например, сохранить информацию о реферере и реферале в базе данных
+  // и начислить вознаграждение пользователю, который отправил ссылку
+  bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}`);
+});
+
 // Обработчик для команды '/getuserid'.
 bot.onText(/\/getuserid/, (msg) => {
   const chatId = msg.chat.id;
