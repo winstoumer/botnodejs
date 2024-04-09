@@ -134,8 +134,6 @@ bot.onText(/\/start$/, async (msg) => {
       // Добавляем нового пользователя в базу данных
       await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
       bot.sendMessage(userId, 'Добро пожаловать! Вы получили 100 монет за регистрацию.', opts);
-    } else {
-      bot.sendMessage(userId, 'Вы уже зарегистрированы в нашей системе.');
     }
     
   } catch (error) {
