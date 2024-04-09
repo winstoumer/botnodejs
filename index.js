@@ -165,6 +165,8 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
   const userId = msg.from.id;
   const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
   const webAppUrl = 'https://t.me/minerweb3_bot/app';
+    const chatId = msg.chat.id;
+  bot.sendMessage(chatId, 'Пора добывать!');
     
   const opts = {
     reply_markup: JSON.stringify({
