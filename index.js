@@ -110,6 +110,41 @@ const bot = new TelegramBot(token, { polling: true })
 
 console.log('Бот запущен..');
 
+bot.onText(/\/start$/, async (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, 'Пора добывать!');
+
+  const userId = msg.from.id;
+  const webAppUrl = 'https://t.me/minerweb3_bot/app';
+
+  const opts = {
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [{ text: 'Открыть', url: webAppUrl }]
+      ]
+    })
+  };
+
+  try {
+    // Проверяем, существует ли пользователь в базе данных
+    const userQuery = 'SELECT * FROM Balance WHERE telegram_user_id = $1';
+    const userResult = await pool.query(userQuery, [userId]);
+    
+    if (userResult.rows.length === 0) {
+      // Добавляем нового пользователя в базу данных
+      await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
+      bot.sendMessage(userId, 'Добро пожаловать! Вы получили 100 монет за регистрацию.', opts);
+    } else {
+      bot.sendMessage(userId, 'Вы уже зарегистрированы в нашей системе.');
+    }
+    
+  } catch (error) {
+    console.error('Ошибка:', error);
+    bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
+  }
+});
+
+
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, 'Пора добывать!');
