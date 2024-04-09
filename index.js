@@ -135,7 +135,6 @@ bot.onText(/\/start$/, async (msg) => {
       bot.sendMessage(userId, 'Вы получили 100 монет за регистрацию.', opts);
     } else {
       sendWelcomePhoto(chatId);
-      bot.sendMessage(userId, 'Врум.. врум..', opts)
     }
     
   } catch (error) {
@@ -146,17 +145,24 @@ bot.onText(/\/start$/, async (msg) => {
 
 // Функция для отправки приветственного фото
 function sendWelcomePhoto(chatId) {
+  const opts = {
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [{ text: 'Открыть', url: webAppUrl }]
+      ]
+    })
+  };
+
   const photoUrl = 'https://i.ibb.co/rfz1Q9b/Designer-34.jpg'; // URL вашего фото
-  const photoCaption = 'Заводи машину.'; // Подпись к фото
+  const photoCaption = 'Заводи машину!'; // Подпись к фото
 
   // Отправляем фото
-  bot.sendPhoto(chatId, photoUrl, { caption: photoCaption });
+  bot.sendPhoto(chatId, photoUrl, { caption: photoCaption }, opts);
 }
 
 
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'Пора добывать!');
 
   const userId = msg.from.id;
   const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
