@@ -112,8 +112,6 @@ console.log('Бот запущен..');
 
 bot.onText(/\/start$/, async (msg) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'Пора добывать!');
-
   const userId = msg.from.id;
   const webAppUrl = 'https://t.me/minerweb3_bot/app';
 
@@ -133,9 +131,11 @@ bot.onText(/\/start$/, async (msg) => {
     if (userResult.rows.length === 0) {
       // Добавляем нового пользователя в базу данных
       await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
-      bot.sendMessage(userId, 'Добро пожаловать! Вы получили 100 монет за регистрацию.', opts);
+      sendWelcomePhoto(chatId); // Отправляем приветственное фото
+      bot.sendMessage(userId, 'Вы получили 100 монет за регистрацию.', opts);
     } else {
-      bot.sendMessage(userId, 'Погнали!', opts); // добавляем opts сюда
+      sendWelcomePhoto(chatId);
+      bot.sendMessage(userId, 'Врум.. врум..', opts)
     }
     
   } catch (error) {
@@ -144,6 +144,14 @@ bot.onText(/\/start$/, async (msg) => {
   }
 });
 
+// Функция для отправки приветственного фото
+function sendWelcomePhoto(chatId) {
+  const photoUrl = 'https://i.ibb.co/rfz1Q9b/Designer-34.jpg'; // URL вашего фото
+  const photoCaption = 'Заводи машину.'; // Подпись к фото
+
+  // Отправляем фото
+  bot.sendPhoto(chatId, photoUrl, { caption: photoCaption });
+}
 
 
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
@@ -184,7 +192,7 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
 
       bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 100 монет за приглашение.`, opts);
     } else {
-      bot.sendMessage(userId, 'Вы уже были приглашены или ранее присоединились.');
+      bot.sendMessage(userId, 'Эх, сука... Вы уже были приглашены или ранее присоединились.');
     }
     
   } catch (error) {
