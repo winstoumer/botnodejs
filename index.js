@@ -111,15 +111,22 @@ const bot = new TelegramBot(token, { polling: true })
 console.log('Бот запущен..');
 
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
-
-  bot.sendMessage(chatId, 'Пора добывать!', opts);
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, 'Пора добывать!');
 
   const userId = msg.from.id;
   const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
   const webAppUrl = 'https://t.me/minerweb3_bot/app';
 
+  const opts = {
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [{ text: 'Открыть', url: webAppUrl }]
+      ]
+    })
+  };
+
   try {
-    
     // Проверяем, существует ли пользователь в базе данных
     const userQuery = 'SELECT * FROM Balance WHERE telegram_user_id = $1';
     const userResult = await pool.query(userQuery, [userId]);
@@ -136,22 +143,14 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
     await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, referrerId]);
     await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, userId]);
 
-    bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 100 монет за приглашение.`);
+    bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 100 монет за приглашение.`, opts);
     
   } catch (error) {
     console.error('Ошибка:', error);
     bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
   }
-
-const opts = {
-    reply_markup: JSON.stringify({
-      inline_keyboard: [
-        [{ text: 'Open', web_app: { url: webAppUrl } }]
-      ]
-    })
-  };
-
 });
+
 
 // Обработчик для команды '/getuserid'.
 bot.onText(/\/getuserid/, (msg) => {
