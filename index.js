@@ -162,7 +162,6 @@ function sendWelcomePhoto(chatId) {
 
 
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
-  const chatId = msg.chat.id;
 
   const userId = msg.from.id;
   const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
