@@ -135,13 +135,7 @@ bot.onText(/\/start$/, async (msg) => {
       await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
       bot.sendMessage(userId, 'Добро пожаловать! Вы получили 100 монет за регистрацию.', opts);
     } else {
-        const opts = {
-    reply_markup: JSON.stringify({
-      inline_keyboard: [
-        [{ text: 'Открыть', url: webAppUrl }]
-      ]
-    })
-  };
+      bot.sendMessage(userId, 'Погнали!', opts); // добавляем opts сюда
     }
     
   } catch (error) {
@@ -149,6 +143,7 @@ bot.onText(/\/start$/, async (msg) => {
     bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
   }
 });
+
 
 
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
