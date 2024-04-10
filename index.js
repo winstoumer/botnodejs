@@ -91,6 +91,25 @@ app.post('/api/collect/:userId', async (req, res) => {
   }
 });
 
+app.get('/api/miner/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const query = `
+      SELECT m.lvl, m.time_mined, m.coin_mined, m.price_miner
+      FROM user_miner um
+      INNER JOIN miner m ON um.miner_id = m.miner_id
+      WHERE um.telegram_user_id = $1
+    `;
+    const { rows } = await pool.query(query, [userId]);
+    if (rows.length > 0) {
+      res.json(rows[0]);
+    } else {
+      res.status(404).json({ error: 'Miner info not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
@@ -152,13 +171,11 @@ function sendWelcomePhoto(chatId, webAppUrl) {
   bot.sendPhoto(chatId, photoUrl, { caption: photoCaption, reply_markup: { inline_keyboard: [[{ text: 'Открыть', url: webAppUrl }]] } });
 }
 
-
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
   const userId = msg.from.id;
   const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
   const webAppUrl = 'https://t.me/minerweb3_bot/app';
-    const chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'Пора добывать!');
+  const chatId = msg.chat.id;
     
   const opts = {
     reply_markup: JSON.stringify({
