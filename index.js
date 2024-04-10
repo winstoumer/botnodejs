@@ -117,7 +117,7 @@ app.get('/api/nextCollectionTime/:telegramUserId', async (req, res) => {
     const query = `
       SELECT (MAX(c.date) + INTERVAL m.time_mined HOUR)::timestamp AS next_collection_time, m.time_mined
       FROM collect c
-      JOIN miner m ON c.collecting = m.coin_mined
+      CROSS JOIN miner m
       WHERE c.telegram_user_id = $1;
     `;
     const values = [telegramUserId];
@@ -128,6 +128,7 @@ app.get('/api/nextCollectionTime/:telegramUserId', async (req, res) => {
     res.status(500).json({ error: 'Ошибка при получении времени следующего сбора монет' });
   }
 });
+
 
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
