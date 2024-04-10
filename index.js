@@ -95,7 +95,7 @@ app.get('/api/miner/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const query = `
-      SELECT m.lvl, m.time_mined, m.coin_mined, m.price_miner, m.name
+      SELECT m.lvl, m.time_mined, m.coin_mined, m.price_miner, m.name, m.miner_image_url
       FROM user_miner um
       INNER JOIN miner m ON um.miner_id = m.miner_id
       WHERE um.telegram_user_id = $1
