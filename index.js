@@ -112,7 +112,7 @@ app.get('/api/miner/:userId', async (req, res) => {
 });
 
 app.get('/nextCollectionTime/:telegramUserId', async (req, res) => {
-  try {
+  try { //с
     const { telegramUserId } = req.params;
     const query = `
       SELECT MAX(c.date) AS next_collection_time
