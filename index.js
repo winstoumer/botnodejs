@@ -115,12 +115,10 @@ app.get('/nextCollectionTime/:telegramUserId', async (req, res) => {
   const telegramUserId = req.params.telegramUserId;
   try {
     const query = `
-      SELECT (date + INTERVAL m.time_mined HOUR)::timestamp AS next_collection_time
-      FROM collect c
-      JOIN miner m ON c.collecting = m.coin_mined
-      WHERE c.telegram_user_id = $1
-      ORDER BY c.date DESC
-      LIMIT 1;
+      SELECT (MAX(c.date) + INTERVAL m.time_mined HOUR)::timestamp AS next_collection_time, m.time_mined
+FROM collect c
+JOIN miner m ON c.collecting = m.coin_mined
+WHERE c.telegram_user_id = $1;
     `;
     const values = [telegramUserId];
     const result = await pool.query(query, values);
