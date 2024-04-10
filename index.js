@@ -111,23 +111,30 @@ app.get('/api/miner/:userId', async (req, res) => {
   }
 });
 
-app.get('/api/nextCollectionTime/:telegramUserId', async (req, res) => {
+app.get('/nextCollectionTime/:telegramUserId', async (req, res) => {
   try {
     const { telegramUserId } = req.params;
     const query = `
-      SELECT (MAX(c.date) + INTERVAL m.time_mined HOUR)::timestamp AS next_collection_time, m.time_mined
+      SELECT (MAX(c.date) + INTERVAL m.time_mined || ' HOUR')::timestamp AS next_collection_time
       FROM collect c
-      CROSS JOIN miner m
+      JOIN user_miner um ON c.telegram_user_id = um.telegram_user_id
+      JOIN miner m ON um.miner_id = m.miner_id
       WHERE c.telegram_user_id = $1;
     `;
     const values = [telegramUserId];
     const result = await pool.query(query, values);
-    res.json(result.rows[0]);
+    
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ error: 'Нет данных о сборе монет для указанного пользователя' });
+    }
   } catch (error) {
     console.error('Ошибка при получении времени следующего сбора монет:', error);
     res.status(500).json({ error: 'Ошибка при получении времени следующего сбора монет' });
   }
 });
+
 
 
 // Обработка несуществующих маршрутов
