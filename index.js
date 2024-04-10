@@ -111,6 +111,26 @@ app.get('/api/miner/:userId', async (req, res) => {
   }
 });
 
+app.get('/nextCollectionTime/:telegramUserId', async (req, res) => {
+  const telegramUserId = req.params.telegramUserId;
+  try {
+    const query = `
+      SELECT (date + INTERVAL m.time_mined HOUR)::timestamp AS next_collection_time
+      FROM collect c
+      JOIN miner m ON c.collecting = m.coin_mined
+      WHERE c.telegram_user_id = $1
+      ORDER BY c.date DESC
+      LIMIT 1;
+    `;
+    const values = [telegramUserId];
+    const result = await pool.query(query, values);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Ошибка при получении времени следующего сбора монет:', error);
+    res.status(500).json({ error: 'Ошибка при получении времени следующего сбора монет' });
+  }
+});
+
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
