@@ -130,6 +130,61 @@ app.get('/nextCollectionTime/:telegramUserId', async (req, res) => {
   }
 });
 
+app.get('/coinsCollected/:telegramUserId', async (req, res) => {
+  try {
+    const { telegramUserId } = req.params;
+    const query = `
+      SELECT 
+        SUM(collecting) AS total_coins_collected
+      FROM 
+        collect
+      WHERE 
+        telegram_user_id = $1;
+    `;
+    const values = [telegramUserId];
+    const result = await pool.query(query, values);
+    
+    if (result.rows.length > 0 && result.rows[0].total_coins_collected !== null) {
+      const coinsCollected = result.rows[0].total_coins_collected;
+      res.json({ coinsCollected });
+    } else {
+      res.status(404).json({ error: 'Coins collected data not found' });
+    }
+  } catch (error) {
+    console.error('Error retrieving coins collected data:', error);
+    res.status(500).json({ error: 'Error retrieving coins collected data' });
+  }
+});
+
+app.get('/totalCoinsToCollect/:telegramUserId', async (req, res) => {
+  try {
+    const { telegramUserId } = req.params;
+    const query = `
+      SELECT 
+        SUM(coin_mined) AS total_coins_to_collect
+      FROM 
+        miner
+      JOIN 
+        user_miner ON miner.miner_id = user_miner.miner_id
+      WHERE 
+        telegram_user_id = $1;
+    `;
+    const values = [telegramUserId];
+    const result = await pool.query(query, values);
+    
+    if (result.rows.length > 0 && result.rows[0].total_coins_to_collect !== null) {
+      const totalCoinsToCollect = result.rows[0].total_coins_to_collect;
+      res.json({ totalCoinsToCollect });
+    } else {
+      res.status(404).json({ error: 'Total coins to collect data not found' });
+    }
+  } catch (error) {
+    console.error('Error retrieving total coins to collect data:', error);
+    res.status(500).json({ error: 'Error retrieving total coins to collect data' });
+  }
+});
+
+
 
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
