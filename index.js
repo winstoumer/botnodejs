@@ -248,6 +248,11 @@ app.post('/api/completed_tasks', async (req, res) => {
 app.get('/api/miners/:telegram_user_id', async (req, res) => {
   const telegramUserId = req.params.telegram_user_id;
   try {
+    // Проверка, является ли telegramUserId числом
+    if (isNaN(parseInt(telegramUserId))) {
+      return res.status(400).json({ error: 'Invalid telegram_user_id' });
+    }
+
     const userMiner = await pool.query(`
       SELECT m.miner_id, m.lvl
       FROM miner m
@@ -278,7 +283,7 @@ app.get('/api/miners/:telegram_user_id', async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error('Error executing query', err);
-    res.status(500).send('Internal Server Error');
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
