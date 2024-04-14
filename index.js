@@ -245,14 +245,15 @@ app.post('/api/completed_tasks', async (req, res) => {
   }
 });
 
-app.get('/api/miners', async (req, res) => {
+app.get('/api/miners/:telegram_user_id', async (req, res) => {
+  const telegramUserId = req.params.telegram_user_id;
   try {
     const userMiner = await pool.query(`
       SELECT m.miner_id, m.lvl
       FROM miner m
       JOIN user_miner um ON m.miner_id = um.miner_id
       WHERE um.telegram_user_id = $1;
-    `, [req.query.telegram_user_id]);
+    `, [telegramUserId]);
 
     const currentUserLevel = userMiner.rows.length > 0 ? userMiner.rows[0].lvl : 0;
 
@@ -272,7 +273,7 @@ app.get('/api/miners', async (req, res) => {
       WHERE m.miner_id NOT IN (SELECT miner_id FROM user_miner_cte)
       AND m.lvl >= $2
       ORDER BY lvl ASC;
-    `, [req.query.telegram_user_id, currentUserLevel]);
+    `, [telegramUserId, currentUserLevel]);
 
     res.json(result.rows);
   } catch (err) {
@@ -280,7 +281,6 @@ app.get('/api/miners', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
-
 
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
