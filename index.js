@@ -235,6 +235,24 @@ bot.onText(/\/start$/, async (msg) => {
     console.error('Ошибка:', error);
     bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
   }
+
+  try {
+    // Проверяем, существует ли пользователь в базе данных
+    const userMinerQuery = 'SELECT * FROM user_miner WHERE telegram_user_id = $1';
+    const userMinerResult = await pool.query(userMinerQuery, [userId]);
+    
+    if (userMinerResult.rows.length === 0) {
+        // Добавляем нового пользователя в базу данных
+        await pool.query('INSERT INTO user_miner (telegram_user_id, miner_id, date) VALUES ($1, $2, $3)', [userId, 1, new Date()]);
+        bot.sendMessage(userId, 'Вы присоединились к группе майнеров.');
+        sendWelcomePhoto(chatId, webAppUrl); // Отправляем приветственное фото с передачей URL
+    } else {
+        sendWelcomePhoto(chatId, webAppUrl);
+    }
+} catch (error) {
+    console.error('Ошибка:', error);
+    bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
+}
 });
 
 // Функция для отправки приветственного фото
