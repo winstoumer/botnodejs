@@ -248,37 +248,28 @@ app.post('/api/completed_tasks', async (req, res) => {
 app.get('/api/miners/:telegram_user_id', async (req, res) => {
   const telegramUserId = req.params.telegram_user_id;
   try {
-    // Проверка, является ли telegramUserId числом
     if (isNaN(parseInt(telegramUserId))) {
       return res.status(400).json({ error: 'Invalid telegram_user_id' });
     }
 
-    const userMiner = await pool.query(`
-      SELECT m.miner_id, m.lvl
-      FROM miner m
-      JOIN user_miner um ON m.miner_id = um.miner_id
-      WHERE um.telegram_user_id = $1;
-    `, [telegramUserId]);
-
-    const currentUserLevel = userMiner.rows.length > 0 ? userMiner.rows[0].lvl : 0;
-
     const result = await pool.query(`
       WITH user_miner_cte AS (
         SELECT m.miner_id, m.lvl, m.time_mined, m.name, m.coin_mined, m.price_mined, m.miner_image_url,
-        CASE WHEN um.miner_id IS NULL THEN FALSE ELSE TRUE END AS owned_by_user
+        CASE 
+          WHEN um.miner_id IS NULL THEN FALSE 
+          ELSE TRUE 
+        END AS owned_by_user
         FROM miner m
         LEFT JOIN user_miner um ON m.miner_id = um.miner_id AND um.telegram_user_id = $1
-        ORDER BY owned_by_user DESC, m.lvl ASC
       )
       SELECT * FROM user_miner_cte
-      WHERE lvl >= $2
-      UNION
-      SELECT m.miner_id, m.lvl, m.time_mined, m.name, m.coin_mined, m.price_mined, m.miner_image_url, FALSE AS owned_by_user
-      FROM miner m
-      WHERE m.miner_id NOT IN (SELECT miner_id FROM user_miner_cte)
-      AND m.lvl >= $2
-      ORDER BY lvl ASC;
-    `, [telegramUserId, currentUserLevel]);
+      WHERE miner_id IN (
+        SELECT miner_id FROM user_miner_cte WHERE owned_by_user = TRUE
+        UNION ALL
+        SELECT miner_id FROM user_miner_cte WHERE owned_by_user = FALSE
+        ORDER BY owned_by_user DESC, lvl ASC
+      );
+    `, [telegramUserId]);
 
     res.json(result.rows);
   } catch (err) {
