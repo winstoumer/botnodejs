@@ -204,34 +204,36 @@ app.get('/api/tasks/:telegram_user_id', async (req, res) => {
 });
 
 // Маршрут для сохранения выполненного задания пользователем
+// Обновление баланса пользователя при выполнении задания
 app.post('/api/completed_tasks', async (req, res) => {
   try {
     const { task_id, telegram_user_id } = req.body;
 
-    // Проверяем наличие обязательных параметров
-    if (!task_id || !telegram_user_id) {
-      return res.status(400).json({ error: 'Missing required parameters in the request body' });
-    }
-
-    // Проверяем, существует ли задание с указанным ID
-    const taskExists = await pool.query('SELECT id FROM Task WHERE id = $1', [task_id]);
-    if (taskExists.rows.length === 0) {
+    // Получаем награду за выполненное задание
+    const { rows: taskRows } = await pool.query('SELECT coin_reward FROM task WHERE id = $1', [task_id]);
+    if (taskRows.length === 0) {
       return res.status(404).json({ error: 'Task not found' });
     }
+    const coinReward = taskRows[0].coin_reward;
 
-    // Проверяем, не выполнил ли пользователь это задание ранее
-    const completedTaskExists = await pool.query('SELECT id FROM Completed_Task WHERE task_id = $1 AND telegram_user_id = $2', [task_id, telegram_user_id]);
-    if (completedTaskExists.rows.length > 0) {
-      return res.status(400).json({ error: 'Task already completed by the user' });
+    // Получаем текущий баланс пользователя
+    const { rows: balanceRows } = await pool.query('SELECT coins FROM balance WHERE telegram_user_id = $1', [telegram_user_id]);
+    if (balanceRows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
     }
+    const currentCoins = balanceRows[0].coins;
 
-    // Вставляем запись о выполненном задании в базу данных
-    await pool.query('INSERT INTO Completed_Task (task_id, telegram_user_id, status) VALUES ($1, $2, $3)', [task_id, telegram_user_id, true]);
-
-    res.status(200).send('Completed task saved successfully');
+    // Обновляем баланс пользователя, добавляя награду за выполненное задание
+    const newCoins = currentCoins + coinReward;
+    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [newCoins, telegram_user_id]);
+    
+    if (result.rowCount > 0) {
+      return res.status(200).json({ message: 'Coins updated successfully' });
+    } else {
+      return res.status(500).json({ error: 'Failed to update coins' });
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message });
   }
 });
 
