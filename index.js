@@ -223,15 +223,24 @@ app.post('/api/completed_tasks', async (req, res) => {
     }
     const currentCoins = balanceRows[0].coins;
 
-    // Обновляем баланс пользователя, добавляя награду за выполненное задание
-    const newCoins = currentCoins + coinReward;
-    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [newCoins, telegram_user_id]);
-    
-    if (result.rowCount > 0) {
-      return res.status(200).json({ message: 'Coins updated successfully' });
-    } else {
-      return res.status(500).json({ error: 'Failed to update coins' });
-    }
+    // Проверяем, существует ли уже запись о выполненном задании для данного пользователя и задания
+const completedTaskExists = await pool.query('SELECT id FROM Completed_Task WHERE task_id = $1 AND telegram_user_id = $2', [task_id, telegram_user_id]);
+if (completedTaskExists.rows.length > 0) {
+  return res.status(400).json({ error: 'Task already completed by the user' });
+}
+
+// Обновляем баланс пользователя, добавляя награду за выполненное задание
+const newCoins = currentCoins + coinReward;
+const updateBalanceResult = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [newCoins, telegram_user_id]);
+
+if (updateBalanceResult.rowCount > 0) {
+  // Если баланс успешно обновлен, вставляем запись о выполненном задании
+  await pool.query('INSERT INTO Completed_Task (task_id, telegram_user_id) VALUES ($1, $2)', [task_id, telegram_user_id]);
+  return res.status(200).json({ message: 'Coins updated successfully' });
+} else {
+  return res.status(500).json({ error: 'Failed to update coins' });
+}
+
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
