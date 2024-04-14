@@ -235,7 +235,7 @@ const updateBalanceResult = await pool.query('UPDATE balance SET coins = $1 WHER
 
 if (updateBalanceResult.rowCount > 0) {
   // Если баланс успешно обновлен, вставляем запись о выполненном задании
-  await pool.query('INSERT INTO Completed_Task (task_id, telegram_user_id) VALUES ($1, $2)', [task_id, telegram_user_id]);
+  await pool.query('INSERT INTO Completed_Task (task_id, telegram_user_id, status) VALUES ($1, $2, $3)', [task_id, telegram_user_id, true]);
   return res.status(200).json({ message: 'Coins updated successfully' });
 } else {
   return res.status(500).json({ error: 'Failed to update coins' });
