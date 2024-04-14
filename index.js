@@ -278,6 +278,21 @@ app.get('/api/miners/:telegram_user_id', async (req, res) => {
   }
 });
 
+app.get('/api/minersg', async (req, res) => {
+  try {
+    const miners = await pool.query(`
+      SELECT * FROM miner ORDER BY lvl ASC;
+    `);
+
+    res.json(miners.rows);
+  } catch (err) {
+    console.error('Error fetching miners:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
