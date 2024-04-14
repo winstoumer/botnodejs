@@ -245,6 +245,43 @@ app.post('/api/completed_tasks', async (req, res) => {
   }
 });
 
+app.get('/api/miners', async (req, res) => {
+  try {
+    const userMiner = await pool.query(`
+      SELECT m.miner_id, m.lvl
+      FROM miner m
+      JOIN user_miner um ON m.miner_id = um.miner_id
+      WHERE um.telegram_user_id = $1;
+    `, [req.query.telegram_user_id]);
+
+    const currentUserLevel = userMiner.rows.length > 0 ? userMiner.rows[0].lvl : 0;
+
+    const result = await pool.query(`
+      WITH user_miner_cte AS (
+        SELECT m.miner_id, m.lvl, m.time_mined, m.name, m.coin_mined, m.price_mined, m.miner_image_url,
+        CASE WHEN um.miner_id IS NULL THEN FALSE ELSE TRUE END AS owned_by_user
+        FROM miner m
+        LEFT JOIN user_miner um ON m.miner_id = um.miner_id AND um.telegram_user_id = $1
+        ORDER BY owned_by_user DESC, m.lvl ASC
+      )
+      SELECT * FROM user_miner_cte
+      WHERE lvl >= $2
+      UNION
+      SELECT m.miner_id, m.lvl, m.time_mined, m.name, m.coin_mined, m.price_mined, m.miner_image_url, FALSE AS owned_by_user
+      FROM miner m
+      WHERE m.miner_id NOT IN (SELECT miner_id FROM user_miner_cte)
+      AND m.lvl >= $2
+      ORDER BY lvl ASC;
+    `, [req.query.telegram_user_id, currentUserLevel]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
