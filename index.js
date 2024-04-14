@@ -184,7 +184,56 @@ app.get('/totalCoinsToCollect/:telegramUserId', async (req, res) => {
   }
 });
 
+// Маршрут для получения всех заданий и выполненных заданий для пользователя
+app.get('/api/tasks/:telegram_user_id', async (req, res) => {
+  try {
+    const { telegram_user_id } = req.params;
 
+    // Получаем все задания для пользователя
+    const tasks = await pool.query(`
+      SELECT t.*, ct.status AS completed
+      FROM Task t
+      LEFT JOIN Completed_Task ct ON t.id = ct.task_id AND ct.telegram_user_id = $1;
+    `, [telegram_user_id]);
+
+    res.json(tasks.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Маршрут для сохранения выполненного задания пользователем
+app.post('/api/completed_tasks', async (req, res) => {
+  try {
+    const { task_id, telegram_user_id } = req.body;
+
+    // Проверяем наличие обязательных параметров
+    if (!task_id || !telegram_user_id) {
+      return res.status(400).json({ error: 'Missing required parameters in the request body' });
+    }
+
+    // Проверяем, существует ли задание с указанным ID
+    const taskExists = await pool.query('SELECT id FROM Task WHERE id = $1', [task_id]);
+    if (taskExists.rows.length === 0) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    // Проверяем, не выполнил ли пользователь это задание ранее
+    const completedTaskExists = await pool.query('SELECT id FROM Completed_Task WHERE task_id = $1 AND telegram_user_id = $2', [task_id, telegram_user_id]);
+    if (completedTaskExists.rows.length > 0) {
+      return res.status(400).json({ error: 'Task already completed by the user' });
+    }
+
+    // Вставляем запись о выполненном задании в базу данных
+    await pool.query('INSERT INTO Completed_Task (task_id, telegram_user_id, status) VALUES ($1, $2, $3)', [task_id, telegram_user_id, true]);
+
+    res.status(200).send('Completed task saved successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
