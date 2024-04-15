@@ -265,15 +265,19 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
     }
 
     const userMinerId = userMiner.miner_id;
+    const userMinerLvl = userMiner.lvl;
 
-    // Получаем всех остальных майнеров в порядке уровня
+    // Получаем всех остальных майнеров, не являющихся майнерами пользователя, в порядке уровня
     const otherMinersQuery = `
       SELECT m.*
       FROM miner m
       WHERE m.miner_id != $1
-      ORDER BY m.lvl;
+      ORDER BY CASE 
+        WHEN m.lvl < $2 THEN 1 -- майнеры с уровнем меньше уровня пользователя
+        ELSE 2 -- майнеры с уровнем >= уровня пользователя
+      END, m.lvl;
     `;
-    const otherMinersResult = await pool.query(otherMinersQuery, [userMinerId]);
+    const otherMinersResult = await pool.query(otherMinersQuery, [userMinerId, userMinerLvl]);
 
     // Объединяем результаты и отправляем клиенту
     const miners = [userMiner, ...otherMinersResult.rows];
