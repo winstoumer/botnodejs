@@ -313,6 +313,29 @@ app.put('/api/user_miner/:telegramUserId', async (req, res) => {
     }
 });
 
+app.put('/api/coins_upgrader/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { coins } = req.body;
+
+    // Проверяем наличие userId и coins в теле запроса
+    if (!userId || !coins) {
+      return res.status(400).json({ error: 'Missing userId or coins in request body' });
+    }
+
+    // Обновляем баланс пользователя в таблице Balance
+    const result = await pool.query('UPDATE balance SET coins = $1 WHERE telegram_user_id = $2', [coins, userId]);
+    if (result.rowCount > 0) {
+      return res.status(200).json({ message: 'User balance updated successfully' });
+    } else {
+      return res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
