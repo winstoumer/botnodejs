@@ -259,20 +259,24 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
     const userMinerResult = await pool.query(userMinerQuery, [telegramUserId]);
     const userMiner = userMinerResult.rows[0];
 
-    // Получаем уровень майнера пользователя
-    const userMinerLvl = userMiner ? userMiner.lvl : 0;
-
-    // Получаем список всех майнеров, начиная с уровня следующего за уровнем майнера пользователя
+    // Получаем список всех майнеров, отсортированных по уровню
     const allMinersQuery = `
-      SELECT m.*
-      FROM miner m
-      WHERE m.lvl >= $1
-      ORDER BY m.lvl;
+      SELECT *
+      FROM miner
+      ORDER BY lvl;
     `;
-    const allMinersResult = await pool.query(allMinersQuery, [userMinerLvl]);
+    const allMinersResult = await pool.query(allMinersQuery);
 
-    // Объединяем результаты и отправляем клиенту
-    const miners = userMiner ? [userMiner, ...allMinersResult.rows.filter(miner => miner.miner_id !== userMiner.miner_id)] : allMinersResult.rows;
+    // Создаем список майнеров, начиная с майнера пользователя, если он есть
+    let miners = [];
+    if (userMiner) {
+      miners.push(userMiner);
+    }
+
+    // Добавляем все остальные майнеры в список
+    miners = miners.concat(allMinersResult.rows.filter(miner => miner.miner_id !== (userMiner && userMiner.miner_id)));
+
+    // Отправляем клиенту список майнеров
     res.json(miners);
   } catch (error) {
     console.error('Error executing query', error);
