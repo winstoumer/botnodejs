@@ -263,9 +263,10 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
     const allMinersQuery = `
       SELECT *
       FROM miner
+      WHERE miner_id != $1
       ORDER BY lvl;
     `;
-    const allMinersResult = await pool.query(allMinersQuery);
+    const allMinersResult = await pool.query(allMinersQuery, [userMiner?.miner_id || 0]);
 
     // Создаем список майнеров, начиная с майнера пользователя, если он есть
     let miners = [];
@@ -274,7 +275,7 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
     }
 
     // Добавляем все остальные майнеры в список
-    miners = miners.concat(allMinersResult.rows.filter(miner => miner.miner_id !== (userMiner && userMiner.miner_id)));
+    miners = miners.concat(allMinersResult.rows);
 
     // Отправляем клиенту список майнеров
     res.json(miners);
