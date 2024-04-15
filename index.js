@@ -259,29 +259,23 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
     const userMinerResult = await pool.query(userMinerQuery, [telegramUserId]);
     const userMiner = userMinerResult.rows[0];
 
-    if (!userMiner) {
-      res.json([]);
-      return;
-    }
+    // Получаем уровень майнера пользователя
+    const userMinerLvl = userMiner ? userMiner.lvl : 0;
 
-    const userMinerId = userMiner.miner_id;
-    const userMinerLvl = userMiner.lvl;
-
-    // Получаем всех остальных майнеров, не являющихся майнерами пользователя, в порядке уровня
+    // Получаем список остальных майнеров, начиная с уровня, следующего за уровнем пользователя
     const otherMinersQuery = `
       SELECT m.*
       FROM miner m
-      WHERE m.miner_id != $1
-      ORDER BY CASE 
-        WHEN m.lvl < $2 THEN 1 -- майнеры с уровнем меньше уровня пользователя
-        ELSE 2 -- майнеры с уровнем >= уровня пользователя
-      END, m.lvl;
+      WHERE m.lvl >= $1 AND m.miner_id != $2
+      UNION
+      SELECT m.*
+      FROM miner m
+      WHERE m.miner_id = $2;
     `;
-    const otherMinersResult = await pool.query(otherMinersQuery, [userMinerId, userMinerLvl]);
+    const otherMinersResult = await pool.query(otherMinersQuery, [userMinerLvl, userMiner?.miner_id]);
 
     // Объединяем результаты и отправляем клиенту
-    const miners = [userMiner, ...otherMinersResult.rows];
-    res.json(miners);
+    res.json(otherMinersResult.rows);
   } catch (error) {
     console.error('Error executing query', error);
     res.status(500).json({ error: 'Internal server error' });
