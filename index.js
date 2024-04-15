@@ -248,7 +248,7 @@ app.post('/api/completed_tasks', async (req, res) => {
 app.get('/api/miners/:telegramUserId', async (req, res) => {
   try {
     const { telegramUserId } = req.params;
-    
+
     // Получаем майнера пользователя
     const userMinerQuery = `
       SELECT m.*
@@ -266,7 +266,7 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
 
     const userMinerId = userMiner.miner_id;
 
-    // Получаем всех остальных майнеров, не являющихся майнерами пользователя, в порядке уровня
+    // Получаем всех остальных майнеров в порядке уровня
     const otherMinersQuery = `
       SELECT m.*
       FROM miner m
