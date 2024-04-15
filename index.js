@@ -245,36 +245,21 @@ app.post('/api/completed_tasks', async (req, res) => {
   }
 });
 
-app.get('/api/miners/:telegram_user_id', async (req, res) => {
-  const telegramUserId = req.params.telegram_user_id;
+app.get('/api/miners/:telegramUserId', async (req, res) => {
   try {
-    if (isNaN(parseInt(telegramUserId))) {
-      return res.status(400).json({ error: 'Invalid telegram_user_id' });
-    }
-
-    const result = await pool.query(`
-      WITH user_miner_cte AS (
-        SELECT m.miner_id, m.lvl, m.time_mined, m.name, m.coin_mined, m.price_mined, m.miner_image_url,
-        CASE 
-          WHEN um.miner_id IS NULL THEN FALSE 
-          ELSE TRUE 
-        END AS owned_by_user
-        FROM miner m
-        LEFT JOIN user_miner um ON m.miner_id = um.miner_id AND um.telegram_user_id = $1
-      )
-      SELECT * FROM user_miner_cte
-      WHERE miner_id IN (
-        SELECT miner_id FROM user_miner_cte WHERE owned_by_user = TRUE
-        UNION ALL
-        SELECT miner_id FROM user_miner_cte WHERE owned_by_user = FALSE
-        ORDER BY owned_by_user DESC, lvl ASC
-      );
-    `, [telegramUserId]);
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error executing query', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    const { telegramUserId } = req.params;
+    const query = `
+      SELECT m.*
+      FROM miner m
+      LEFT JOIN user_miner um ON m.miner_id = um.miner_id
+      WHERE um.telegram_user_id = $1 OR um.telegram_user_id IS NULL
+      ORDER BY CASE WHEN um.id IS NULL THEN 1 ELSE 0 END, m.lvl;
+    `;
+    const { rows } = await pool.query(query, [telegramUserId]);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
