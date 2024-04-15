@@ -288,6 +288,31 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
   }
 });
 
+// Маршрут для обновления miner_id пользователя
+app.put('/api/user_miner/:telegramUserId', async (req, res) => {
+    try {
+        const { telegramUserId } = req.params;
+        const { minerId } = req.body; // Предполагается, что вы отправляете новый minerId в теле запроса
+
+        // Проверяем, существует ли майнер с указанным minerId
+        const minerQuery = 'SELECT * FROM miner WHERE miner_id = $1';
+        const minerResult = await pool.query(minerQuery, [minerId]);
+        if (minerResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Miner not found' });
+        }
+
+        // Обновляем miner_id пользователя в таблице user_miner
+        const updateQuery = 'UPDATE user_miner SET miner_id = $1 WHERE telegram_user_id = $2';
+        await pool.query(updateQuery, [minerId, telegramUserId]);
+
+        // Возвращаем успешный ответ
+        res.status(200).json({ message: 'Miner updated successfully' });
+    } catch (error) {
+        console.error('Error updating miner:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
