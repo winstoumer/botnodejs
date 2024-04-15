@@ -249,40 +249,40 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
   try {
     const { telegramUserId } = req.params;
     
-    // Получаем уровень майнера пользователя.
+    // Получаем майнера пользователя
     const userMinerQuery = `
-      SELECT m.lvl
+      SELECT m.*
       FROM miner m
       JOIN user_miner um ON m.miner_id = um.miner_id
-      WHERE um.telegram_user_id = $1
-      ORDER BY m.lvl
-      LIMIT 1;
+      WHERE um.telegram_user_id = $1;
     `;
     const userMinerResult = await pool.query(userMinerQuery, [telegramUserId]);
-    const userMinerLvl = userMinerResult.rows[0].lvl || 0;
+    const userMiner = userMinerResult.rows[0];
 
-    // Получаем список остальных майнеров, начиная с уровня, следующего за уровнем пользователя
+    if (!userMiner) {
+      res.json([]);
+      return;
+    }
+
+    const userMinerId = userMiner.miner_id;
+
+    // Получаем всех остальных майнеров, не являющихся майнерами пользователя, в порядке уровня
     const otherMinersQuery = `
       SELECT m.*
       FROM miner m
-      WHERE m.lvl >= $1 AND m.miner_id NOT IN (
-        SELECT um.miner_id
-        FROM user_miner um
-        WHERE um.telegram_user_id = $2
-      )
+      WHERE m.miner_id != $1
       ORDER BY m.lvl;
     `;
-    const otherMinersResult = await pool.query(otherMinersQuery, [userMinerLvl + 1, telegramUserId]);
+    const otherMinersResult = await pool.query(otherMinersQuery, [userMinerId]);
 
     // Объединяем результаты и отправляем клиенту
-    const miners = userMinerResult.rows.concat(otherMinersResult.rows);
+    const miners = [userMiner, ...otherMinersResult.rows];
     res.json(miners);
   } catch (error) {
     console.error('Error executing query', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 app.get('/api/minersg', async (req, res) => {
   try {
