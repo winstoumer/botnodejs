@@ -249,7 +249,7 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
   try {
     const { telegramUserId } = req.params;
     
-    // Получаем уровень майнера пользователя
+    // Получаем уровень майнера пользователя.
     const userMinerQuery = `
       SELECT m.lvl
       FROM miner m
