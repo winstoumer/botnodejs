@@ -251,9 +251,8 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
     const query = `
       SELECT m.*
       FROM miner m
-      LEFT JOIN user_miner um ON m.miner_id = um.miner_id
-      WHERE um.telegram_user_id = $1 OR um.telegram_user_id IS NULL
-      ORDER BY CASE WHEN um.id IS NULL THEN 1 ELSE 0 END, m.lvl;
+      LEFT JOIN user_miner um ON m.miner_id = um.miner_id AND um.telegram_user_id = $1
+      ORDER BY um.telegram_user_id = $1 DESC, m.lvl;
     `;
     const { rows } = await pool.query(query, [telegramUserId]);
     res.json(rows);
