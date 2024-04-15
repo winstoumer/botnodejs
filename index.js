@@ -284,50 +284,6 @@ app.get('/api/miners/:telegramUserId', async (req, res) => {
   }
 });
 
-app.get('/api/minersg', async (req, res) => {
-  try {
-    const miners = await pool.query(`
-      SELECT * FROM miner ORDER BY lvl ASC;
-    `);
-
-    res.json(miners.rows);
-  } catch (err) {
-    console.error('Error fetching miners:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-app.get('/api/minerst/:telegram_user_id', async (req, res) => {
-  const telegramUserId = req.params.telegram_user_id;
-  try {
-    // Получаем информацию о майнере пользователя
-    const userMiner = await pool.query(`
-      SELECT m.*, um.lvl AS user_lvl
-      FROM miner m
-      LEFT JOIN user_miner um ON m.miner_id = um.miner_id AND um.telegram_user_id = $1;
-    `, [telegramUserId]);
-
-    // Получаем уровень майнера пользователя
-    const userLevel = userMiner.rows.length > 0 ? userMiner.rows[0].user_lvl : 0;
-
-    // Получаем список всех майнеров, начиная с уровня, следующего за уровнем майнера пользователя
-    const otherMiners = await pool.query(`
-      SELECT *
-      FROM miner
-      WHERE lvl >= $1
-      ORDER BY lvl ASC;
-    `, [userLevel + 1]);
-
-    // Возвращаем информацию о майнере пользователя и список остальных майнеров
-    res.json({ userMiner: userMiner.rows[0], otherMiners: otherMiners.rows });
-  } catch (err) {
-    console.error('Error fetching miners:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-
-
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
