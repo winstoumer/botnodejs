@@ -362,7 +362,7 @@ bot.onText(/\/start$/, async (msg) => {
   const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
-        [{ text: 'Открыть', url: webAppUrl }]
+        [{ text: 'Open', url: webAppUrl }]
       ]
     })
   };
@@ -423,7 +423,7 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
   const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
-        [{ text: 'Открыть', url: webAppUrl }]
+        [{ text: 'Open', url: webAppUrl }]
       ]
     })
   };
