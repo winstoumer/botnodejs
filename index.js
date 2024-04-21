@@ -48,7 +48,7 @@ async function fetchData() {
   return {
     "url": "https://6622cbe436d7030008c5e5be--miningwebbot.netlify.app/",
     "name": "Mining",
-    "iconUrl": "https://i.ibb.co/2dMvBXb/F848-F3-A3-AACD-4517-9-AD0-853-C4-FE0-E2-EC.png",
+    "iconUrl": "https://i.ibb.co/nzbVcWv/timeminecoin-icon.png",
     "termsOfUseUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/terms-of-use.txt",
     "privacyPolicyUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/privacy-policy.txt"
   };
