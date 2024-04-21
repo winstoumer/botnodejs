@@ -29,6 +29,31 @@ const pool = new Pool({
 app.use(cors()); // Use CORS middleware
 app.use(express.json()); // Для парсинга JSON тела 
 
+app.get('/api/json-x/tonconnect-manifest.json', async (req, res) => {
+  try {
+    // Асинхронная функция для получения данных
+    const data = await fetchData();
+
+    // Отправка JSON данных в ответ на запрос
+    res.json(data);
+  } catch (error) {
+    // Если произошла ошибка, отправляем статус 500 (Внутренняя ошибка сервера)
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Асинхронная функция для получения данных
+async function fetchData() {
+  // Здесь может быть асинхронный код для получения данных
+  return {
+    "url": "https://6622cbe436d7030008c5e5be--miningwebbot.netlify.app/",
+    "name": "Mining",
+    "iconUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/apple-touch-icon.png",
+    "termsOfUseUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/terms-of-use.txt",
+    "privacyPolicyUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/privacy-policy.txt"
+  };
+}
+
 // Define API routes
 app.get('/api/coins/:userId', async (req, res) => {
   try {
