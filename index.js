@@ -360,6 +360,59 @@ app.put('/api/coins_upgrader/:userId', async (req, res) => {
   }
 });
 
+// Обработчик запросов GET на /box/:telegramUserId
+app.get('/box/:telegramUserId', async (req, res) => {
+  const telegramUserId = req.params.telegramUserId;
+
+  try {
+    // Выполнение SQL-запроса для получения значения total по telegram user id
+    const query = 'SELECT total FROM box WHERE telegram_user_id = $1';
+    const { rows } = await pool.query(query, [telegramUserId]);
+
+    // Проверка наличия результатов запроса
+    if (rows.length > 0) {
+      res.json({ total: rows[0].total });
+    } else {
+      res.status(404).json({ error: 'Not found' });
+    }
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Обработчик запросов POST на /box/:telegramUserId
+app.post('/box/:telegramUserId', async (req, res) => {
+  const telegramUserId = req.params.telegramUserId;
+  const newTotal = req.body.total;
+
+  try {
+    // Выполнение SQL-запроса для обновления значения total по telegram user id
+    const query = 'UPDATE box SET total = $1 WHERE telegram_user_id = $2';
+    await pool.query(query, [newTotal, telegramUserId]);
+
+    res.json({ message: 'Total updated successfully' });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/orders_nft', async (req, res) => {
+  const { telegram_user_id, user_ton_address, nft_id, date } = req.body;
+
+  try {
+    // Выполнение SQL-запроса для добавления новой записи в таблицу "orders_nft"
+    const query = 'INSERT INTO orders_nft (telegram_user_id, user_ton_address, nft_id, date) VALUES ($1, $2, $3, $4)';
+    await pool.query(query, [telegram_user_id, user_ton_address, nft_id, date]);
+
+    res.json({ message: 'New order added successfully' });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
