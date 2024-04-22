@@ -465,6 +465,26 @@ bot.onText(/\/start$/, async (msg) => {
   }
 
   try {
+  // Проверяем, существует ли пользователь в таблице Box
+  const userQuery = 'SELECT * FROM Box WHERE telegram_user_id = $1';
+  const userResult = await pool.query(userQuery, [userId]);
+
+  if (userResult.rows.length === 0) {
+    // Добавляем нового пользователя в таблицу Box с total равным 0
+    await pool.query('INSERT INTO Box (telegram_user_id, total) VALUES ($1, $2)', [userId, 0]);
+    // Отправляем приветственное сообщение или фото
+  } else {
+    // Пользователь уже существует в таблице Box
+    // Отправляем приветственное сообщение или фото
+  }
+
+} catch (error) {
+  console.error('Ошибка:', error);
+  // Обработка ошибки
+}
+
+
+  try {
     // Проверяем, существует ли пользователь в базе данных
     const userMinerQuery = 'SELECT * FROM user_miner WHERE telegram_user_id = $1';
     const userMinerResult = await pool.query(userMinerQuery, [userId]);
