@@ -456,7 +456,6 @@ bot.onText(/\/start$/, async (msg) => {
       bot.sendMessage(userId, 'Вы получили 100 монет за регистрацию.');
       sendWelcomePhoto(chatId, webAppUrl); // Отправляем приветственное фото с передачей URL
     } else {
-      sendWelcomePhoto(chatId, webAppUrl);
     }
     
   } catch (error) {
