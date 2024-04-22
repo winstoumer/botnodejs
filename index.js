@@ -382,7 +382,7 @@ app.get('/box/:telegramUserId', async (req, res) => {
 });
 
 // Обработчик запросов POST на /box/:telegramUserId
-app.post('/box/:telegramUserId', async (req, res) => {
+app.put('/box/:telegramUserId', async (req, res) => {
   const telegramUserId = req.params.telegramUserId;
   const newTotal = req.body.total;
 
