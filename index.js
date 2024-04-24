@@ -413,6 +413,21 @@ app.post('/orders_nft', async (req, res) => {
   }
 });
 
+// Get refferals count
+app.get('/referral/:referralId', async (req, res) => {
+  const referralId = req.params.referralId;
+
+  try {
+    const query = 'SELECT COUNT(*) AS total_referrals FROM referral WHERE referral_id = $1';
+    const { rows } = await pool.query(query, [referralId]);
+    const totalReferrals = rows[0].total_referrals;
+
+    res.json({ totalReferrals });
+  } catch (error) {
+    console.error('Error executing query', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 // Обработка несуществующих маршрутов
 app.use((req, res) => {
@@ -474,7 +489,6 @@ bot.onText(/\/start$/, async (msg) => {
     // Отправляем приветственное сообщение или фото
   } else {
     // Пользователь уже существует в таблице Box
-      bot.sendMessage(userId, 'Ты уже есть в Box.');
     // Отправляем приветственное сообщение или фото
   }
 
