@@ -588,6 +588,31 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
 	bot.sendMessage(chatId, resp)
 })
 
+const path = require('path');
+// Указываем Express, чтобы он обслуживал статические файлы из папки 'videos'
+app.use('/videos', express.static(path.join(__dirname, 'videos')));
+
+// Эндпоинт для получения списка видеофайлов
+app.get('/api/videos', (req, res) => {
+  // Получаем список файлов в папке 'videos'
+  fs.readdir(path.join(__dirname, 'videos'), (err, files) => {
+    if (err) {
+      console.error('Error reading video directory:', err);
+      return res.status(500).json({ error: 'Failed to read video directory' });
+    }
+    // Фильтруем только видеофайлы
+    const videoFiles = files.filter(file => {
+      const fileExtension = path.extname(file).toLowerCase();
+      return ['.mp4', '.webm', '.ogg'].includes(fileExtension);
+    });
+    // Возвращаем список видеофайлов
+    res.json({ videos: videoFiles });
+  });
+});
+
+
+
+
 'use strict';
 
 console.log('Hello, World!');
