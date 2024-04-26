@@ -507,7 +507,7 @@ bot.onText(/\/start$/, async (msg) => {
         // Добавляем нового пользователя в базу данных
         await pool.query('INSERT INTO user_miner (telegram_user_id, miner_id, date) VALUES ($1, $2, $3)', [userId, 1, new Date()]);
         bot.sendMessage(userId, 'Вы присоединились к группе майнеров.');
-        sendWelcomePhoto(chatId, webAppUrl); // Отправляем приветственное фото с передачей URL
+        //sendWelcomePhoto(chatId, webAppUrl); // Отправляем приветственное фото с передачей URL
     } else {
         sendWelcomePhoto(chatId, webAppUrl);
     }
@@ -519,7 +519,7 @@ bot.onText(/\/start$/, async (msg) => {
 
 // Функция для отправки приветственного фото
 function sendWelcomePhoto(chatId, webAppUrl) {
-  const photoUrl = 'https://i.ibb.co/rfz1Q9b/Designer-34.jpg'; // URL вашего фото
+  const photoUrl = 'https://i.ibb.co/8rsYM8V/Untitled.png'; // URL вашего фото
   const photoCaption = 'Заводи машину!'; // Подпись к фото
 
   // Отправляем фото вместе с кнопкой "Открыть"
