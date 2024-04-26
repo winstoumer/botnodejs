@@ -519,8 +519,8 @@ bot.onText(/\/start$/, async (msg) => {
 
 // Функция для отправки приветственного фото
 function sendWelcomePhoto(chatId, webAppUrl) {
-  const photoUrl = 'https://i.ibb.co/8rsYM8V/Untitled.png'; // URL вашего фото
-  const photoCaption = 'Заводи машину!'; // Подпись к фото
+  const photoUrl = 'https://i.ibb.co/HFFKN0M/Untitled.png'; // URL вашего фото
+  const photoCaption = ''; // Подпись к фото
 
   // Отправляем фото вместе с кнопкой "Открыть"
   bot.sendPhoto(chatId, photoUrl, { caption: photoCaption, reply_markup: { inline_keyboard: [[{ text: 'Открыть', url: webAppUrl }]] } });
