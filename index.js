@@ -47,8 +47,8 @@ async function fetchData() {
   // Здесь может быть асинхронный код для получения данных
   return {
     "url": "https://6622cbe436d7030008c5e5be--miningwebbot.netlify.app/",
-    "name": "Mining",
-    "iconUrl": "https://i.ibb.co/nzbVcWv/timeminecoin-icon.png",
+    "name": "Meencapsule",
+    "iconUrl": "https://i.ibb.co/kqdtY34/Untitled.png",
     "termsOfUseUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/terms-of-use.txt",
     "privacyPolicyUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/privacy-policy.txt"
   };
