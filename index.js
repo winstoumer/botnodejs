@@ -46,11 +46,11 @@ app.get('/api/json-x/tonconnect-manifest.json', async (req, res) => {
 async function fetchData() {
   // Здесь может быть асинхронный код для получения данных
   return {
-    "url": "https://6622cbe436d7030008c5e5be--miningwebbot.netlify.app/",
+    "url": "https://miningwebbot.netlify.app",
     "name": "Meencapsule",
     "iconUrl": "https://i.ibb.co/kqdtY34/Untitled.png",
-    "termsOfUseUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/terms-of-use.txt",
-    "privacyPolicyUrl": "https://ton-connect.github.io/demo-dapp-with-react-ui/privacy-policy.txt"
+    "termsOfUseUrl": "https://miningwebbot.netlify.app",
+    "privacyPolicyUrl": "https://miningwebbot.netlify.app"
   };
 }
 
