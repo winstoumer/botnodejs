@@ -441,7 +441,7 @@ app.listen(port, () => {
 
 const TelegramBot = require('node-telegram-bot-api')
 
-const token = '6306257543:AAG4VxHk9JiuxTb3-LweaDJfvpcdZRNgD5A'
+const token = '6415454027:AAHNRAdzZnI8udkeyNa_HjBCOCo1zn0C_so'
 
 const bot = new TelegramBot(token, { polling: true })
 
@@ -450,7 +450,7 @@ console.log('Бот запущен..');
 bot.onText(/\/start$/, async (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  const webAppUrl = 'https://t.me/minerweb3_bot/app';
+  const webAppUrl = 'https://t.me/meencapsule_bot/app';
 
   const opts = {
     reply_markup: JSON.stringify({
@@ -467,15 +467,15 @@ bot.onText(/\/start$/, async (msg) => {
     
     if (userResult.rows.length === 0) {
       // Добавляем нового пользователя в базу данных
-      await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 100]);
-      bot.sendMessage(userId, 'Вы получили 100 монет за регистрацию.');
+      await pool.query('INSERT INTO Balance (telegram_user_id, coins) VALUES ($1, $2)', [userId, 50]);
+      //bot.sendMessage(userId, 'Вы получили монет за регистрацию.');
       sendWelcomePhoto(chatId, webAppUrl); // Отправляем приветственное фото с передачей URL
     } else {
     }
     
   } catch (error) {
     console.error('Ошибка:', error);
-    bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
+    //bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
   }
 
   try {
@@ -493,8 +493,8 @@ bot.onText(/\/start$/, async (msg) => {
   }
 
 } catch (error) {
-  console.error('Ошибка:', error);
-  bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
+console.error('Ошибка:', error);
+  //bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
 }
 
 
@@ -506,14 +506,14 @@ bot.onText(/\/start$/, async (msg) => {
     if (userMinerResult.rows.length === 0) {
         // Добавляем нового пользователя в базу данных
         await pool.query('INSERT INTO user_miner (telegram_user_id, miner_id, date) VALUES ($1, $2, $3)', [userId, 1, new Date()]);
-        bot.sendMessage(userId, 'Вы присоединились к группе майнеров.');
+        //bot.sendMessage(userId, 'Вы присоединились к группе майнеров.');
         //sendWelcomePhoto(chatId, webAppUrl); // Отправляем приветственное фото с передачей URL
     } else {
         sendWelcomePhoto(chatId, webAppUrl);
     }
 } catch (error) {
     console.error('Ошибка:', error);
-    bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
+    //bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
 }
 });
 
@@ -529,7 +529,7 @@ function sendWelcomePhoto(chatId, webAppUrl) {
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
   const userId = msg.from.id;
   const referrerId = match[1]; // ID пользователя, который отправил реферальную ссылку
-  const webAppUrl = 'https://t.me/minerweb3_bot/app';
+  const webAppUrl = 'https://t.me/meencapsule_bot/app';
   const chatId = msg.chat.id;
     
   const opts = {
@@ -557,36 +557,19 @@ bot.onText(/\/start r_(\d+)/, async (msg, match) => {
       await pool.query('INSERT INTO referral (telegram_user_id, referral_id) VALUES ($1, $2)', [userId, referrerId]);
 
       // Добавляем реферальные бонусы
-      await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, referrerId]);
-      await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [100, userId]);
+      await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [10, referrerId]);
+      await pool.query('UPDATE Balance SET coins = coins + $1 WHERE telegram_user_id = $2', [10, userId]);
 
-      bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 100 монет за приглашение.`, opts);
+      //bot.sendMessage(userId, `Вы были приглашены пользователем с ID ${referrerId}. Вам начислено 10 монет за приглашение.`, opts);
     } else {
-      bot.sendMessage(userId, 'Эх, сука... Вы уже были приглашены или ранее присоединились.');
+      //bot.sendMessage(userId, 'Эх, сука... Вы уже были приглашены или ранее присоединились.');
     }
     
   } catch (error) {
     console.error('Error:', error);
-    bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
+    //bot.sendMessage(userId, 'Произошла ошибка при обработке вашего запроса.');
   }
 });
-
-// Обработчик для команды '/getuserid'.
-bot.onText(/\/getuserid/, (msg) => {
-  const chatId = msg.chat.id;
-  const userId = msg.from.id;
-
-  // Отправляем ID пользователя обратно в чат.
-  bot.sendMessage(chatId, `Ваш Telegram ID: ${userId}`);
-});
-
-bot.onText(/\/echo (.+)/, (msg, match) => {
-
-	const chatId = msg.chat.id
-	const resp = match[1]
-
-	bot.sendMessage(chatId, resp)
-})
 
 const path = require('path');
 // Указываем Express, чтобы он обслуживал статические файлы из папки 'videos'
@@ -609,9 +592,6 @@ app.get('/api/videos', (req, res) => {
     res.json({ videos: videoFiles });
   });
 });
-
-
-
 
 'use strict';
 
