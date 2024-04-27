@@ -523,7 +523,7 @@ function sendWelcomePhoto(chatId, webAppUrl) {
   const photoCaption = ''; // Подпись к фото
 
   // Отправляем фото вместе с кнопкой "Открыть"
-  bot.sendPhoto(chatId, photoUrl, { caption: photoCaption, reply_markup: { inline_keyboard: [[{ text: 'Открыть', url: webAppUrl }]] } });
+  bot.sendPhoto(chatId, photoUrl, { caption: photoCaption, reply_markup: { inline_keyboard: [[{ text: 'Open', url: webAppUrl }]] } });
 }
 
 bot.onText(/\/start r_(\d+)/, async (msg, match) => {
